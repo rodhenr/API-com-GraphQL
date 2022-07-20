@@ -1,9 +1,11 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const empresaSchema = Schema({
   nome: { type: String, required: true },
-  funcionarios: { type: Schema.Types.ObjectId, ref: "Funcionario" },
+  colaboradores: { type: Schema.Types.ObjectId, ref: "Funcionario" },
 });
 
-module.exports = mongoose.model("Empresa", empresaSchema);
+const modelEmpresa = mongoose.model("Empresa", empresaSchema);
+
+export default modelEmpresa;

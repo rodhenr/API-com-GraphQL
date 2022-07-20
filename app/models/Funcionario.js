@@ -1,11 +1,13 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const funcionarioSchema = Schema({
   nome: { type: String, required: true },
-  idade: { type: String, required: true },
+  idade: { type: Number, required: true },
   empresa: { type: Schema.Types.ObjectId, ref: "Empresa" },
-  função: { type: String, required: true },
+  cargo: { type: String, required: true },
 });
 
-module.exports = mongoose.model("Funcionario", funcionarioSchema);
+const modelFuncionario = mongoose.model("Funcionario", funcionarioSchema);
+
+export default modelFuncionario;

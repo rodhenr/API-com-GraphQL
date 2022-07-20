@@ -1,5 +1,6 @@
 import Funcionario from "../../app/models/Funcionario.js";
 import Empresa from "../../app/models/Empresa.js";
+import mongoose from "mongoose";
 
 const funcionarioResolver = {
   Query: {
@@ -27,7 +28,6 @@ const funcionarioResolver = {
 
           empresa.colaboradores.push(newFuncionario._id);
           await empresa.save();
-          console.log(newFuncionario.empresa);
 
           return newFuncionario;
         } else {
@@ -44,7 +44,7 @@ const funcionarioResolver = {
             empresa: newEmpresa._id,
           });
 
-          empresa.colaboradores.push(newFuncionario._id);
+          newEmpresa.colaboradores.push(newFuncionario._id);
           newEmpresa.save();
 
           return newFuncionario;
@@ -61,10 +61,69 @@ const funcionarioResolver = {
         return newFuncionario;
       }
     },
-    updateFuncionario: async (_, { id, data }) =>
-      await Funcionario.findOneAndUpdate(id, data, { new: true }),
-    deleteFuncionario: async (_, { id }) =>
-      !!(await Funcionario.findByIdAndDelete(id)),
+    updateFuncionario: async (_, { id, data }) => {
+      if (data?.empresa) {
+        const funcionario = await Funcionario.findById(id);
+
+        if (funcionario) {
+          const funcionarioAtualizado = await Funcionario.findOneAndUpdate(
+            { _id: id },
+            data,
+            { new: true }
+          ).populate("empresa");
+
+          // Remove empresa antiga
+          await Empresa.findOneAndUpdate(
+            { _id: funcionario.empresa },
+            {
+              $pull: {
+                colaboradores: id,
+              },
+            }
+          );
+
+          // Adiciona funcionario na nova empresa
+          await Empresa.findOneAndUpdate(
+            { _id: data.empresa },
+            {
+              $push: {
+                colaboradores: funcionario._id,
+              },
+            }
+          );
+
+          return funcionarioAtualizado;
+        }
+      } else {
+        const funcionario = await Funcionario.findOneAndUpdate(
+          { _id: id },
+          data,
+          {
+            new: true,
+          }
+        ).populate("empresa");
+
+        return funcionario;
+      }
+    },
+    deleteFuncionario: async (_, { id }) => {
+      const funcionario = await Funcionario.findByIdAndDelete(id);
+
+      if (funcionario) {
+        await Empresa.findOneAndUpdate(
+          { _id: funcionario.empresa },
+          {
+            $pullAll: {
+              colaboradores: [id],
+            },
+          }
+        );
+
+        return true;
+      } else {
+        return false;
+      }
+    },
   },
 };
 

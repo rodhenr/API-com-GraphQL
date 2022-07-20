@@ -21,9 +21,16 @@ const funcionarioSchema = gql`
     cargo: String!
   }
 
+  input FuncionarioUpdate {
+    nome: String
+    idade: Int
+    empresa: ID
+    cargo: String
+  }
+
   type Mutation {
     createFuncionario(data: FuncionarioInput): Funcionario!
-    updateFuncionario(id: ID, data: FuncionarioInput): Funcionario!
+    updateFuncionario(id: ID, data: FuncionarioUpdate): Funcionario!
     deleteFuncionario(id: ID!): Boolean
   }
 `;

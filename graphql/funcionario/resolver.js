@@ -1,6 +1,6 @@
 import Funcionario from "../../app/models/Funcionario.js";
 import Empresa from "../../app/models/Empresa.js";
-import mongoose from "mongoose";
+import { UserInputError } from "apollo-server-core";
 
 const funcionarioResolver = {
   Query: {
@@ -13,6 +13,7 @@ const funcionarioResolver = {
     createFuncionario: async (_, { data }) => {
       const empresa = await Empresa.findById(data.empresa);
 
+      // Se a empresa existir
       if (empresa) {
         // Cria um novo funcionário
         const funcionario = await Funcionario.create(data);
@@ -28,21 +29,22 @@ const funcionarioResolver = {
         );
 
         return funcionario.populate("empresa");
+      } else {
+        throw new UserInputError("Empresa ID inválido");
       }
-
-      return null;
     },
     updateFuncionario: async (_, { id, data }) => {
       if (data?.empresa) {
         const funcionario = await Funcionario.findById(id);
 
+        // Se o ID for válido
         if (funcionario) {
           // Atualiza o funcionário
           const funcionarioAtualizado = await Funcionario.findOneAndUpdate(
             { _id: id },
             data,
             { new: true }
-          ).populate("empresa");
+          );
 
           // Remove funcionário da empresa antiga
           await Empresa.findOneAndUpdate(
@@ -64,7 +66,7 @@ const funcionarioResolver = {
             }
           );
 
-          return funcionarioAtualizado;
+          return funcionarioAtualizado.populate("empresa");
         }
       } else {
         const funcionario = await Funcionario.findOneAndUpdate(
@@ -73,19 +75,17 @@ const funcionarioResolver = {
           {
             new: true,
           }
-        ).populate("empresa");
+        );
 
-        return funcionario;
+        return funcionario.populate("empresa");
       }
     },
     deleteFuncionario: async (_, { id }) => {
-      const funcionario = await Funcionario.findById(id);
-
-      if (funcionario) {
+      try {
         await Funcionario.findByIdAndDelete(id);
         return true;
-      } else {
-        throw new UserInputError("ID inválido");
+      } catch (err) {
+        throw new UserInputError("ID Inválido");
       }
     },
   },

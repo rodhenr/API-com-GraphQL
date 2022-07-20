@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const empresaSchema = Schema({
   nome: { type: String, required: true },
-  colaboradores: { type: Schema.Types.ObjectId, ref: "Funcionario" },
+  colaboradores: [{ type: Schema.Types.ObjectId, ref: "Funcionario" }],
 });
 
 const modelEmpresa = mongoose.model("Empresa", empresaSchema);

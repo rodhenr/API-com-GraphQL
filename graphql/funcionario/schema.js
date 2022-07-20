@@ -5,27 +5,27 @@ const funcionarioSchema = gql`
     _id: ID!
     nome: String!
     idade: Int!
-    empresa: ID!
+    empresa: Empresa
     cargo: String!
   }
 
   type Query {
-      funcionarios: [Funcionario]!
-      funcionario(id: ID!): Funcionario!
+    funcionarios: [Funcionario]!
+    funcionario(id: ID!): Funcionario!
   }
 
   input FuncionarioInput {
     nome: String!
     idade: Int!
-    empresa: ID!
+    empresa: String!
     cargo: String!
   }
 
   type Mutation {
-      createFuncionario(data: FuncionarioInput): Funcionario!
-      updateFuncionario(id: ID, data: FuncionarioInput): Funcionario!
-      deleteFuncionario(id: ID!): Boolean
+    createFuncionario(data: FuncionarioInput): Funcionario!
+    updateFuncionario(id: ID, data: FuncionarioInput): Funcionario!
+    deleteFuncionario(id: ID!): Boolean
   }
-`
+`;
 
 export default funcionarioSchema;

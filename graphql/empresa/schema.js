@@ -4,12 +4,13 @@ const empresaSchema = gql`
     type Empresa {
         _id: ID!
         nome: String!
-        colaboradores: [Funcionario]
+        colaboradores: [Funcionario]!
     }
 
     type Query {
         empresas: [Empresa]!
         empresa(id: ID!): Empresa!
+        getFuncionarios(empresa: String!): [Funcionario]
     }
 
     input EmpresaInput {

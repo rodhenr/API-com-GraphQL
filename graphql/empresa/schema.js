@@ -10,7 +10,6 @@ const empresaSchema = gql`
     type Query {
         empresas: [Empresa]!
         empresa(id: ID!): Empresa!
-        getFuncionarios(empresa: String!): [Funcionario]
     }
 
     input EmpresaInput {
@@ -18,9 +17,13 @@ const empresaSchema = gql`
         colaboradores: [ID]!
     }
 
+    input EmpresaUpdate {
+        nome: String!
+    }
+
     type Mutation {
         createEmpresa(data: EmpresaInput): Empresa!
-        updateEmpresa(id: ID, data: EmpresaInput): Empresa!
+        updateEmpresa(id: ID, data: EmpresaUpdate): Empresa!
         deleteEmpresa(id: ID!): Boolean
     }
 `;

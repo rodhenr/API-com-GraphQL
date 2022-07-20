@@ -5,7 +5,7 @@ const funcionarioSchema = gql`
     _id: ID!
     nome: String!
     idade: Int!
-    empresa: Empresa
+    empresa: Empresa!
     cargo: String!
   }
 
@@ -17,7 +17,7 @@ const funcionarioSchema = gql`
   input FuncionarioInput {
     nome: String!
     idade: Int!
-    empresa: String!
+    empresa: ID!
     cargo: String!
   }
 

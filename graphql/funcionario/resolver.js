@@ -11,68 +11,40 @@ const funcionarioResolver = {
 
   Mutation: {
     createFuncionario: async (_, { data }) => {
-      if (data.empresa !== "") {
-        // Procura a empresa passada para o funcionário
-        const empresa = await Empresa.findOne({
-          nome: { $regex: `.*${data.empresa}*.` },
-        });
+      const empresa = await Empresa.findById(data.empresa);
 
-        if (empresa) {
-          // Se a empresa já existe
-          const newFuncionario = await Funcionario.create({
-            nome: data.nome,
-            idade: data.idade,
-            cargo: data.cargo,
-            empresa: empresa._id,
-          });
+      if (empresa) {
+        // Cria um novo funcionário
+        const funcionario = await Funcionario.create(data);
 
-          empresa.colaboradores.push(newFuncionario._id);
-          await empresa.save();
+        // Inclui o funcionário na empresa
+        await Empresa.findOneAndUpdate(
+          { _id: data.empresa },
+          {
+            $push: {
+              colaboradores: funcionario._id,
+            },
+          }
+        );
 
-          return newFuncionario;
-        } else {
-          // Se a empresa não existe
-          const newEmpresa = await Empresa.create({
-            nome: data.empresa,
-            colaboradores: [],
-          });
-
-          const newFuncionario = await Funcionario.create({
-            nome: data.nome,
-            idade: data.idade,
-            cargo: data.cargo,
-            empresa: newEmpresa._id,
-          });
-
-          newEmpresa.colaboradores.push(newFuncionario._id);
-          newEmpresa.save();
-
-          return newFuncionario;
-        }
-      } else {
-        // Se não passar uma empresa
-        const newFuncionario = await Funcionario.create({
-          nome: data.nome,
-          idade: data.idade,
-          cargo: data.cargo,
-          empresa: "",
-        });
-
-        return newFuncionario;
+        return funcionario.populate("empresa");
       }
+
+      return null;
     },
     updateFuncionario: async (_, { id, data }) => {
       if (data?.empresa) {
         const funcionario = await Funcionario.findById(id);
 
         if (funcionario) {
+          // Atualiza o funcionário
           const funcionarioAtualizado = await Funcionario.findOneAndUpdate(
             { _id: id },
             data,
             { new: true }
           ).populate("empresa");
 
-          // Remove empresa antiga
+          // Remove funcionário da empresa antiga
           await Empresa.findOneAndUpdate(
             { _id: funcionario.empresa },
             {
@@ -82,7 +54,7 @@ const funcionarioResolver = {
             }
           );
 
-          // Adiciona funcionario na nova empresa
+          // Adiciona funcionario na empresa nova
           await Empresa.findOneAndUpdate(
             { _id: data.empresa },
             {

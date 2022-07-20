@@ -79,21 +79,13 @@ const funcionarioResolver = {
       }
     },
     deleteFuncionario: async (_, { id }) => {
-      const funcionario = await Funcionario.findByIdAndDelete(id);
+      const funcionario = await Funcionario.findById(id);
 
       if (funcionario) {
-        await Empresa.findOneAndUpdate(
-          { _id: funcionario.empresa },
-          {
-            $pullAll: {
-              colaboradores: [id],
-            },
-          }
-        );
-
+        await Funcionario.findByIdAndDelete(id);
         return true;
       } else {
-        return false;
+        throw new UserInputError("ID inválido");
       }
     },
   },

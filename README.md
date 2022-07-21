@@ -2,6 +2,8 @@
 
 Uma API de Funcionários/Empresas feita utilizando GraphQL. 
 
+Nesta aplicação é possível cadastrar empresas e funcionários, onde esses funcionários pertencerão a uma empresa específica na qual é possível obter uma lista individual de funcionários de forma detalhada.
+
 ## :man_technologist: Tecnologias
 
 Para este projeto foram utilizadas as seguintes tecnologias:

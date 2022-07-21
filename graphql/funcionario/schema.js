@@ -8,26 +8,22 @@ const funcionarioSchema = gql`
     empresa: Empresa!
     cargo: String!
   }
-
   type Query {
     funcionarios: [Funcionario]!
     funcionario(id: ID!): Funcionario!
   }
-
   input FuncionarioInput {
     nome: String!
     idade: Int!
     empresa: ID!
     cargo: String!
   }
-
   input FuncionarioUpdate {
     nome: String
     idade: Int
     empresa: ID
     cargo: String
   }
-
   type Mutation {
     createFuncionario(data: FuncionarioInput): Funcionario!
     updateFuncionario(id: ID, data: FuncionarioUpdate): Funcionario!

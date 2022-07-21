@@ -1,6 +1,7 @@
 import Funcionario from "../../app/models/Funcionario.js";
 import Empresa from "../../app/models/Empresa.js";
 import { UserInputError } from "apollo-server-core";
+import conn from "../../connection.js";
 
 const funcionarioResolver = {
   Query: {
@@ -12,9 +13,13 @@ const funcionarioResolver = {
   Mutation: {
     createFuncionario: async (_, { data }) => {
       const empresa = await Empresa.findById(data.empresa);
+      if (!empresa) return new UserInputError("Empresa ID inválido");
 
-      // Se a empresa existir
-      if (empresa) {
+      const session = await conn.startSession();
+
+      try {
+        session.startTransaction();
+
         // Cria um novo funcionário
         const funcionario = await Funcionario.create(data);
 
@@ -28,17 +33,24 @@ const funcionarioResolver = {
           }
         );
 
+        await session.commitTransaction();
         return funcionario.populate("empresa");
-      } else {
-        throw new UserInputError("Empresa ID inválido");
+      } catch (err) {
+        await session.abortTransaction();
       }
+
+      session.endSession();
     },
     updateFuncionario: async (_, { id, data }) => {
-      if (data?.empresa) {
-        const funcionario = await Funcionario.findById(id);
+      const funcionario = await Funcionario.findById(id);
+      if (!funcionario) return new UserInputError("Usuário ID inválido");
 
-        // Se o ID for válido
-        if (funcionario) {
+      const session = await conn.startSession();
+
+      if (data?.empresa) {
+        try {
+          session.startTransaction();
+
           // Atualiza o funcionário
           const funcionarioAtualizado = await Funcionario.findOneAndUpdate(
             { _id: id },
@@ -66,19 +78,30 @@ const funcionarioResolver = {
             }
           );
 
+          await session.commitTransaction();
           return funcionarioAtualizado.populate("empresa");
+        } catch (err) {
+          await session.abortTransaction();
         }
       } else {
-        const funcionario = await Funcionario.findOneAndUpdate(
-          { _id: id },
-          data,
-          {
-            new: true,
-          }
-        );
+        try {
+          session.startTransaction();
 
-        return funcionario.populate("empresa");
+          const funcionarioUpdate = await Funcionario.findOneAndUpdate(
+            { _id: id },
+            data,
+            {
+              new: true,
+            }
+          );
+
+          await session.commitTransaction();
+          return funcionarioUpdate.populate("empresa");
+        } catch (err) {
+          await session.abortTransaction();
+        }
       }
+      session.endSession();
     },
     deleteFuncionario: async (_, { id }) => {
       try {
